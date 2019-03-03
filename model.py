@@ -8,6 +8,7 @@ from data import pad_sequences, batch_yield
 from utils import get_logger
 from eval import conlleval
 
+ATTENTION_SIZE = 50
 
 class BiLSTM_CRF(object):
     def __init__(self, args, embeddings, tag2label, vocab, paths, config):
@@ -70,7 +71,24 @@ class BiLSTM_CRF(object):
                 sequence_length=self.sequence_lengths,
                 dtype=tf.float32)
             output = tf.concat([output_fw_seq, output_bw_seq], axis=-1)
+
+
+            #attention
+            hidden_size = output.shape[2].value
+            attention_size = ATTENTION_SIZE
+            w_omega = tf.Variable(tf.random_normal([hidden_size, attention_size], stddev=0.1))
+            b_omega = tf.Variable(tf.random_normal([attention_size], stddev=0.1))
+            u_omega = tf.Variable(tf.random_normal([attention_size], stddev=0.1))
+
+            with tf.name_scope('v'): #?????
+                v = tf.tanh(tf.tensordot(output, w_omega, axes=1) + b_omega)
+
+            vu = tf.tensordot(v, u_omega, axes=1, name='vu')  # (B,T) shape
+            alphas = tf.nn.softmax(vu, name='alphas')  # (B,T) shape
+            output = output * tf.expand_dims(alphas, -1)
+
             output = tf.nn.dropout(output, self.dropout_pl)
+
 
         with tf.variable_scope("proj"):
             W = tf.get_variable(name="W",
