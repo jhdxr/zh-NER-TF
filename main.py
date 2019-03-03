@@ -11,7 +11,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # default: 0
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
-config.gpu_options.per_process_gpu_memory_fraction = 0.2  # need ~700MB GPU memory
+# config.gpu_options.per_process_gpu_memory_fraction = 0.2  # need ~700MB GPU memory
 
 
 ## hyperparameters
