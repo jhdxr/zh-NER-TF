@@ -8,14 +8,14 @@ from data import pad_sequences, batch_yield
 from utils import get_logger
 from eval import conlleval
 
-ATTENTION_SIZE = 50
-
 class BiLSTM_CRF(object):
     def __init__(self, args, embeddings, tag2label, vocab, paths, config):
         self.batch_size = args.batch_size
         self.epoch_num = args.epoch
         self.hidden_dim = args.hidden_dim
         self.embeddings = embeddings
+        self.attention = args.attention
+        self.attention_size = args.attention_size
         self.CRF = args.CRF
         self.update_embedding = args.update_embedding
         self.dropout_keep_prob = args.dropout
@@ -74,18 +74,19 @@ class BiLSTM_CRF(object):
 
 
             #attention
-            hidden_size = output.shape[2].value
-            attention_size = ATTENTION_SIZE
-            w_omega = tf.Variable(tf.random_normal([hidden_size, attention_size], stddev=0.1))
-            b_omega = tf.Variable(tf.random_normal([attention_size], stddev=0.1))
-            u_omega = tf.Variable(tf.random_normal([attention_size], stddev=0.1))
+            if self.attention:
+                hidden_size = output.shape[2].value
+                attention_size = self.attention_size
+                w_omega = tf.Variable(tf.random_normal([hidden_size, attention_size], stddev=0.1))
+                b_omega = tf.Variable(tf.random_normal([attention_size], stddev=0.1))
+                u_omega = tf.Variable(tf.random_normal([attention_size], stddev=0.1))
 
-            with tf.name_scope('v'): #?????
-                v = tf.tanh(tf.tensordot(output, w_omega, axes=1) + b_omega)
+                with tf.name_scope('v'): #?????
+                    v = tf.tanh(tf.tensordot(output, w_omega, axes=1) + b_omega)
 
-            vu = tf.tensordot(v, u_omega, axes=1, name='vu')  # (B,T) shape
-            alphas = tf.nn.softmax(vu, name='alphas')  # (B,T) shape
-            output = output * tf.expand_dims(alphas, -1)
+                vu = tf.tensordot(v, u_omega, axes=1, name='vu')  # (B,T) shape
+                alphas = tf.nn.softmax(vu, name='alphas')  # (B,T) shape
+                output = output * tf.expand_dims(alphas, -1)
 
             output = tf.nn.dropout(output, self.dropout_pl)
 

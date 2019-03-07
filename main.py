@@ -22,6 +22,8 @@ parser.add_argument('--batch_size', type=int, default=64, help='#sample of each 
 parser.add_argument('--epoch', type=int, default=40, help='#epoch of training')
 parser.add_argument('--hidden_dim', type=int, default=300, help='#dim of hidden state')
 parser.add_argument('--optimizer', type=str, default='Adam', help='Adam/Adadelta/Adagrad/RMSProp/Momentum/SGD')
+parser.add_argument('--attention', type=str2bool, default=True, help='use attention')
+parser.add_argument('--attention-size', type=int, default=50, help='attention size')
 parser.add_argument('--CRF', type=str2bool, default=True, help='use CRF at the top layer. if False, use Softmax')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
 parser.add_argument('--clip', type=float, default=5.0, help='gradient clipping')
