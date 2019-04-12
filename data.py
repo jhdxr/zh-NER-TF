@@ -19,14 +19,18 @@ def read_corpus(corpus_path):
     with open(corpus_path, encoding='utf-8') as fr:
         lines = fr.readlines()
     sent_, tag_ = [], []
-    for line in lines:
-        if line != '\n':
-            [char, label] = line.strip().split()
-            sent_.append(char)
-            tag_.append(label)
-        else:
-            data.append((sent_, tag_))
-            sent_, tag_ = [], []
+    try:
+        for line in lines:
+            if line != '\n':
+                [char, label] = line.strip().split()
+                sent_.append(char)
+                tag_.append(label)
+            else:
+                data.append((sent_, tag_))
+                sent_, tag_ = [], []
+    except Exception as e:
+        print(line)
+        raise e
 
     return data
 
